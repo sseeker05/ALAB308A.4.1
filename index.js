@@ -14,7 +14,7 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 const API_KEY = "live_DExkVGxHgXBd4WMmleuVpK2QJuuuJI6lqbDlX4kOiacfqeDt6xQIMNgnSgfFxzJW";
 axios.defaults.headers.common['x-api-key'] = API_KEY;
 axios.defaults.baseURL = 'https://api.thecatapi.com/v1';
-axios.defaults.headers.common["x-api-key"] = API_KEY;
+
 
 
 
@@ -83,7 +83,60 @@ function createBreedOptions(breeds) {
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
+async function handleBreedSelection() {
+  const selectedBreedId = breedSelect.value;
 
+  try {
+    const breedInfo = await fetchBreedInfo(selectedBreedId);
+
+    Carousel.clear();
+    processBreedInfo(breedInfo);
+    Carousel.start();
+  } catch (error) {
+    console.error("Error loading breed information:", error);
+  }
+}
+
+async function fetchBreedInfo(selectedBreedId) {
+  const response = await fetch(
+    `${baseUrl}/images/search?breed_ids=${selectedBreedId}&limit=10`,
+    {
+      headers: {
+        "x-api-key": API_KEY
+      }
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch breed information: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+function processBreedInfo(breedInfo) {
+  breedInfo.forEach((info) => {
+    const carouselItem = Carousel.createCarouselItem(
+      info.url,
+      info.breeds[0].name,
+      info.id
+    );
+    Carousel.appendCarousel(carouselItem);
+
+    const infoElement = createInfoElement(info.breeds[0]);
+    infoDump.appendChild(infoElement);
+  });
+}
+
+function createInfoElement(breedInfo) {
+  const infoElement = document.createElement("div");
+  infoElement.innerHTML = `
+    <h2>${breedInfo.name}</h2>
+    <p>Description: ${breedInfo.description}</p>
+    <p>Origin: ${breedInfo.origin}</p>
+  `;
+  return infoElement;
+}
 
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
