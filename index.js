@@ -1,4 +1,4 @@
-import * as Carousel from "./carousel";
+import * as Carousel from "./carousel.js";
 import axios from "axios";
 
 // The breed selection input element.
@@ -12,6 +12,11 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
 const API_KEY = "live_DExkVGxHgXBd4WMmleuVpK2QJuuuJI6lqbDlX4kOiacfqeDt6xQIMNgnSgfFxzJW";
+axios.defaults.headers.common['x-api-key'] = API_KEY;
+axios.defaults.baseURL = 'https://api.thecatapi.com/v1';
+axios.defaults.headers.common["x-api-key"] = API_KEY;
+
+
 
 /**
  * 1. Create an async function "initialLoad" that does the following:
@@ -21,7 +26,49 @@ const API_KEY = "live_DExkVGxHgXBd4WMmleuVpK2QJuuuJI6lqbDlX4kOiacfqeDt6xQIMNgnSg
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
+async function fetchBreeds() {
+  const response = await fetch(`${baseUrl}/breeds`, {
+    headers: {
+      "x-api-key": API_KEY
+    }
+  });
+  console.log("response from base url:", response);
+  if (response.ok === false ) {
+    throw new Error(`Failed to fetch breeds: ${response.status}`);
+  }
 
+  return await response.json();
+}
+
+async function initialLoad() {
+  try {
+    const breeds = await fetchBreeds();
+
+    breedSelect.innerHTML = "";
+    createDefaultOption();
+    createBreedOptions(breeds);
+    breedSelect.addEventListener("change", handleBreedSelection);
+  } catch (error) {
+    console.error("Error loading breeds:", error);
+  }
+}
+initialLoad();
+
+function createDefaultOption() {
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "Select a Breed";
+  breedSelect.appendChild(defaultOption);
+}
+
+function createBreedOptions(breeds) {
+  breeds.forEach((breed) => {
+    const option = document.createElement("option");
+    option.value = breed.id;
+    option.textContent = breed.name;
+    breedSelect.appendChild(option);
+  });
+}
 /**
  * 2. Create an event handler for breedSelect that does the following:
  * - Retrieve information on the selected breed from the cat API using fetch().
@@ -36,6 +83,7 @@ const API_KEY = "live_DExkVGxHgXBd4WMmleuVpK2QJuuuJI6lqbDlX4kOiacfqeDt6xQIMNgnSg
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
+
 
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
@@ -109,3 +157,5 @@ export async function favourite(imgId) {
  * - Test other breeds as well. Not every breed has the same data available, so
  *   your code should account for this.
  */
+
+
