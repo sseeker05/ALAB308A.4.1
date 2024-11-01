@@ -1,4 +1,4 @@
-import * as Carousel from "./carousel.js";
+import * as Carousel from "./Carousel.js";
 import axios from "axios";
 
 // The breed selection input element.
@@ -13,9 +13,9 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 // Step 0: Store your API key here for reference and easy access.
 const API_KEY = "live_DExkVGxHgXBd4WMmleuVpK2QJuuuJI6lqbDlX4kOiacfqeDt6xQIMNgnSgfFxzJW";
 axios.defaults.headers.common['x-api-key'] = API_KEY;
-axios.defaults.baseURL = 'https://api.thecatapi.com/v1/breeds';
+// axios.defaults.baseURL = 'https://api.thecatapi.com/v1/breeds';
 
-
+const baseUrl = 'https://api.thecatapi.com/v1/breeds'
 
 
 /**
@@ -61,13 +61,29 @@ function createDefaultOption() {
   breedSelect.appendChild(defaultOption);
 }
 
-function createBreedOptions(breeds) {
-  breeds.forEach((breed) => {
-    const option = document.createElement("option");
-    option.value = breed.id;
-    option.textContent = breed.name;
-    breedSelect.appendChild(option);
+async function carousel(breedID) {
+  try {
+    const response = await fetch(`https://api.thecatapi.com/v1/images/search?breed_id=${breedID}&limit=5`);
+    const jsonData = await response.json();
+
+    clearCarousel();
+
+    jsonData.forEach((image) => {
+      const carouselItem = createCarouselItem(image.url, image.alt, image.id);
+      appendCarousel(carouselItem);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+if (breedSelect) {
+  breedSelect.addEventListener("change", () => {
+    carousel(breedSelect.value);
   });
+} else {
+  console.error("breedSelect element not found");
 }
 /**
  * 2. Create an event handler for breedSelect that does the following:
