@@ -12198,10 +12198,20 @@ var getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
 // Step 0: Store your API key here for reference and easy access.
 var API_KEY = "live_DExkVGxHgXBd4WMmleuVpK2QJuuuJI6lqbDlX4kOiacfqeDt6xQIMNgnSgfFxzJW";
-_axios.default.defaults.headers.common['x-api-key'] = API_KEY;
-// axios.defaults.baseURL = 'https://api.thecatapi.com/v1/breeds';
-
-var baseUrl = 'https://api.thecatapi.com/v1/breeds';
+_axios.default.interceptors.request.use(function (config) {
+  console.log('Request:', config);
+  return config;
+}, function (error) {
+  console.error('Request Error:', error);
+  return Promise.reject(error);
+});
+_axios.default.interceptors.response.use(function (response) {
+  console.log('Response:', response);
+  return response;
+}, function (error) {
+  console.error('Response Error:', error);
+  return Promise.reject(error);
+});
 
 /**
  * 1. Create an async function "initialLoad" that does the following:
@@ -12211,125 +12221,47 @@ var baseUrl = 'https://api.thecatapi.com/v1/breeds';
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
-function fetchBreeds() {
-  return _fetchBreeds.apply(this, arguments);
-}
-function _fetchBreeds() {
-  _fetchBreeds = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-    var response;
-    return _regeneratorRuntime().wrap(function _callee$(_context) {
-      while (1) switch (_context.prev = _context.next) {
-        case 0:
-          _context.next = 2;
-          return fetch("".concat(baseUrl), {
-            headers: {
-              "x-api-key": API_KEY
-            }
-          });
-        case 2:
-          response = _context.sent;
-          console.log("response from base url:", response);
-          if (!(response.ok === false)) {
-            _context.next = 6;
-            break;
-          }
-          throw new Error("Failed to fetch breeds: ".concat(response.status));
-        case 6:
-          _context.next = 8;
-          return response.json();
-        case 8:
-          return _context.abrupt("return", _context.sent);
-        case 9:
-        case "end":
-          return _context.stop();
-      }
-    }, _callee);
-  }));
-  return _fetchBreeds.apply(this, arguments);
-}
 function initialLoad() {
   return _initialLoad.apply(this, arguments);
 }
 function _initialLoad() {
-  _initialLoad = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
-    var breeds;
-    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-      while (1) switch (_context2.prev = _context2.next) {
+  _initialLoad = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+    var response, breeds;
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
         case 0:
-          _context2.prev = 0;
-          _context2.next = 3;
-          return fetchBreeds();
+          _context.prev = 0;
+          _context.next = 3;
+          return _axios.default.get("https://api.thecatapi.com/v1/breeds", {
+            headers: {
+              'x-api-key': API_KEY
+            }
+          });
         case 3:
-          breeds = _context2.sent;
-          breedSelect.innerHTML = "";
-          createDefaultOption();
-          createBreedOptions(breeds);
-          breedSelect.addEventListener("change", handleBreedSelection);
-          _context2.next = 13;
+          response = _context.sent;
+          breeds = response.data;
+          breeds.forEach(function (breed) {
+            var option = document.createElement('option');
+            option.value = breed.id;
+            option.textContent = breed.name;
+            breedSelect.appendChild(option);
+          });
+          breedSelect.addEventListener('change', breedSelectChangeEvent);
+          _context.next = 12;
           break;
-        case 10:
-          _context2.prev = 10;
-          _context2.t0 = _context2["catch"](0);
-          console.error("Error loading breeds:", _context2.t0);
-        case 13:
+        case 9:
+          _context.prev = 9;
+          _context.t0 = _context["catch"](0);
+          console.error(_context.t0);
+        case 12:
         case "end":
-          return _context2.stop();
+          return _context.stop();
       }
-    }, _callee2, null, [[0, 10]]);
+    }, _callee, null, [[0, 9]]);
   }));
   return _initialLoad.apply(this, arguments);
 }
 initialLoad();
-function createDefaultOption() {
-  var defaultOption = document.createElement("option");
-  defaultOption.value = "";
-  defaultOption.textContent = "Select a Breed";
-  breedSelect.appendChild(defaultOption);
-}
-function carousel(_x) {
-  return _carousel.apply(this, arguments);
-}
-function _carousel() {
-  _carousel = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(breedID) {
-    var response, jsonData;
-    return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-      while (1) switch (_context3.prev = _context3.next) {
-        case 0:
-          _context3.prev = 0;
-          _context3.next = 3;
-          return fetch("https://api.thecatapi.com/v1/images/search?breed_id=".concat(breedID, "&limit=5"));
-        case 3:
-          response = _context3.sent;
-          _context3.next = 6;
-          return response.json();
-        case 6:
-          jsonData = _context3.sent;
-          clearCarousel();
-          jsonData.forEach(function (image) {
-            var carouselItem = createCarouselItem(image.url, image.alt, image.id);
-            appendCarousel(carouselItem);
-          });
-          _context3.next = 14;
-          break;
-        case 11:
-          _context3.prev = 11;
-          _context3.t0 = _context3["catch"](0);
-          console.error(_context3.t0);
-        case 14:
-        case "end":
-          return _context3.stop();
-      }
-    }, _callee3, null, [[0, 11]]);
-  }));
-  return _carousel.apply(this, arguments);
-}
-if (breedSelect) {
-  breedSelect.addEventListener("change", function () {
-    carousel(breedSelect.value);
-  });
-} else {
-  console.error("breedSelect element not found");
-}
 /**
  * 2. Create an event handler for breedSelect that does the following:
  * - Retrieve information on the selected breed from the cat API using fetch().
@@ -12396,7 +12328,7 @@ if (breedSelect) {
  *   you delete that favourite using the API, giving this function "toggle" functionality.
  * - You can call this function by clicking on the heart at the top right of any image.
  */
-function favourite(_x2) {
+function favourite(_x) {
   return _favourite.apply(this, arguments);
 }
 /**
@@ -12416,14 +12348,14 @@ function favourite(_x2) {
  *   your code should account for this.
  */
 function _favourite() {
-  _favourite = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(imgId) {
-    return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-      while (1) switch (_context4.prev = _context4.next) {
+  _favourite = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(imgId) {
+    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
         case 0:
         case "end":
-          return _context4.stop();
+          return _context2.stop();
       }
-    }, _callee4);
+    }, _callee2);
   }));
   return _favourite.apply(this, arguments);
 }
@@ -12521,7 +12453,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57400" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62757" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
