@@ -13,7 +13,7 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 // Step 0: Store your API key here for reference and easy access.
 const API_KEY = "live_DExkVGxHgXBd4WMmleuVpK2QJuuuJI6lqbDlX4kOiacfqeDt6xQIMNgnSgfFxzJW";
 axios.defaults.headers.common['x-api-key'] = API_KEY;
-axios.defaults.baseURL = 'https://api.thecatapi.com/v1';
+axios.defaults.baseURL = 'https://api.thecatapi.com/v1/breeds';
 
 
 
@@ -27,7 +27,7 @@ axios.defaults.baseURL = 'https://api.thecatapi.com/v1';
  * This function should execute immediately.
  */
 async function fetchBreeds() {
-  const response = await fetch(`${baseUrl}/breeds`, {
+  const response = await fetch(`${baseUrl}`, {
     headers: {
       "x-api-key": API_KEY
     }
